@@ -21,6 +21,7 @@
         
         ;; Utilities
         clj-time/clj-time {:mvn/version "0.15.2"}
+        clj-http/clj-http {:mvn/version "3.12.3"}
         environ/environ {:mvn/version "1.2.0"}}
 
  :aliases {:dev {:extra-paths ["dev"]
@@ -28,6 +29,9 @@
            
            :test {:extra-paths ["test"]
                   :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}
+           
+           :build {:deps {io.github.clojure/tools.build {:mvn/version "0.9.4"}}
+                   :ns-default build}
            
            :uberjar {:replace-deps {com.github.seancorfield/depstar {:mvn/version "2.1.303"}}
                      :exec-fn hf.depstar/uberjar

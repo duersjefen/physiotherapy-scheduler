@@ -1,38 +1,10 @@
 {
   "name": "physiotherapy-scheduler",
-  "version": "1.0.0",
-  "description": "Self-hosted physiotherapy appointment scheduling system",
-  "keywords": [
-    "physiotherapy",
-    "scheduling",
-    "healthcare",
-    "appointments",
-    "clojurescript",
-    "reagent"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
-  "private": true,
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
-  },
   "scripts": {
     "dev": "shadow-cljs watch app",
-    "build": "shadow-cljs release app",
-    "test": "shadow-cljs compile test",
-    "clean": "rm -rf resources/public/js/compiled",
-    "lint": "echo 'Linting not configured yet'",
-    "start": "npm run dev"
+    "build": "shadow-cljs release app"
   },
-  "dependencies": {},
   "devDependencies": {
     "shadow-cljs": "^2.25.8"
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie <= 11"
-  ]
+  }
 }

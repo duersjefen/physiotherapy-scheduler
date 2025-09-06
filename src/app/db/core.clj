@@ -1,25 +1,19 @@
 (ns app.db.core
   "Database connection and migration handling"
   (:require [next.jdbc :as jdbc]
-            [next.jdbc.connection :as connection]
             [clojure.java.io :as io]
             [taoensso.timbre :as log]
-            [environ.core :refer [env]])
-  (:import [org.sqlite.SQLiteDataSource]))
+            [environ.core :refer [env]]))
 
 (def ^:private db-spec
   "Database specification for SQLite"
   {:dbtype "sqlite"
    :dbname (or (env :database-path) "scheduler.db")})
 
-(def datasource
-  "SQLite datasource for connection pooling"
-  (delay (connection/->pool org.sqlite.SQLiteDataSource db-spec)))
-
 (defn get-connection
   "Get a database connection"
   []
-  (jdbc/get-connection @datasource))
+  (jdbc/get-connection db-spec))
 
 (defn execute!
   "Execute a SQL statement"
@@ -38,17 +32,11 @@
   []
   (log/info "Running database migrations...")
   (try
-    (let [migration-files (->> "migrations"
-                               io/resource
-                               io/file
-                               file-seq
-                               (filter #(.isFile %))
-                               (filter #(.endsWith (.getName %) ".sql"))
-                               (sort-by #(.getName %)))]
-      (doseq [migration-file migration-files]
-        (log/info "Running migration:" (.getName migration-file))
-        (let [migration-sql (slurp migration-file)]
-          (execute! [migration-sql]))))
+    ;; For simplicity, just load the one migration file we have
+    (when-let [migration-resource (io/resource "migrations/001_create_appointments.sql")]
+      (log/info "Running migration: 001_create_appointments.sql")
+      (let [migration-sql (slurp migration-resource)]
+        (execute! [migration-sql])))
     (log/info "Database migrations completed successfully")
     (catch Exception e
       (log/error e "Failed to run database migrations")

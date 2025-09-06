@@ -113,7 +113,7 @@
   "POST /api/slots - Create new appointment slot (Admin only)"
   [request]
   (try
-    (let [body (json/parse-string (slurp (:body request)) true)
+    (let [body (:body request)
           validation (validate-create-slot body)]
       
       (if (:valid validation)
@@ -130,7 +130,7 @@
   [request]
   (try
     (let [slot-id (Integer/parseInt (get-in request [:route-params :id]))
-          body (json/parse-string (slurp (:body request)) true)
+          body (:body request)
           validation (validate-book-slot body)]
       
       (if (:valid validation)

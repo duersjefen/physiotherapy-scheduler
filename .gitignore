@@ -1,6 +1,35 @@
+# Clojure
 /.calva
 /.clj-kondo
 /.cpcache
 /.lsp
+/.nrepl-port
+*.class
+
+# Node.js
 /node_modules
 /package-lock.json
+
+# Databases
+*.db
+!dev.db
+
+# Build artifacts
+/target
+!/target/physiotherapy-scheduler.jar
+
+# Logs
+*.log
+server.out
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Temporary files
+temp_*.clj
+test_*.clj
