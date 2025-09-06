@@ -1,35 +1,36 @@
 # Clojure
-/.calva
-/.clj-kondo
-/.cpcache
-/.lsp
-/.nrepl-port
-*.class
+.cpcache/
+.nrepl-port
+.rebel_readline_history
+target/
+.lein-*
+pom.xml*
 
-# Node.js
-/node_modules
-/package-lock.json
+# ClojureScript
+.shadow-cljs/
+node_modules/
+public/js/
+*.js.map
 
-# Databases
-*.db
-!dev.db
+# Database
+datomic-storage/
+.datomic/
 
-# Build artifacts
-/target
-!/target/physiotherapy-scheduler.jar
-
-# Logs
-*.log
-server.out
+# Editor
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/settings.json
-.idea/
+# Logs
+*.log
+logs/
 
-# Temporary files
-temp_*.clj
-test_*.clj
+# Environment
+.env
+.env.local

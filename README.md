@@ -1,326 +1,183 @@
 # Physiotherapy Scheduler
 
-A self-hosted appointment booking system built with Clojure/ClojureScript, designed specifically for physiotherapy practices and similar healthcare services.
+A comprehensive physiotherapy appointment scheduling system built with Clojure/ClojureScript, Datomic Local, and re-frame.
 
 ## Features
 
-### For Clients
-- **Easy Appointment Booking**: Browse available time slots and book appointments online
-- **Responsive Design**: Works seamlessly on desktop, tablet, and mobile devices
-- **Date Range Filtering**: Search for appointments within specific date ranges
-- **Real-time Availability**: See up-to-date slot availability
-- **Email Confirmation**: Receive booking confirmations via email
+- **Patient Management**: Add, edit, and manage patient information
+- **Appointment Scheduling**: Schedule and manage appointments with time slot management
+- **Authentication**: Secure login system with session management
+- **Modern UI**: React-based frontend with re-frame state management
+- **Database**: Datomic Local for robust data storage
+- **API**: RESTful API with comprehensive error handling
 
-### For Practitioners (Admin)
-- **Slot Management**: Create, view, and manage appointment slots
-- **Client Overview**: View all booked appointments with client details
-- **Flexible Scheduling**: Set custom appointment durations (15-180 minutes)
-- **Dashboard**: Admin panel for comprehensive appointment management
-- **Status Tracking**: Monitor appointment statuses (available, booked, cancelled)
-
-### Technical Features
-- **Self-hosted**: Full control over your data and infrastructure
-- **SQLite Database**: Lightweight, reliable data storage
-- **Docker Support**: Easy deployment with containerization
-- **REST API**: Clean API architecture for potential integrations
-- **Responsive UI**: Built with Tailwind CSS for modern, accessible design
-
-## Technology Stack
+## Tech Stack
 
 ### Backend
-- **Clojure**: Robust, functional programming language
-- **Ring/Jetty**: HTTP server and middleware
-- **Compojure**: Elegant routing library
-- **next.jdbc**: Modern database access
-- **SQLite**: Embedded database (easily replaceable)
+- **Clojure 1.11.1**: Main programming language
+- **Datomic Local**: Database for data storage
+- **Ring/Compojure**: Web server and routing
+- **Buddy**: Authentication and security
+- **Aero**: Configuration management
+- **Timbre**: Logging
 - **Cheshire**: JSON handling
 
 ### Frontend
-- **ClojureScript**: Frontend development in Clojure
+- **ClojureScript**: Frontend programming language
 - **Reagent**: React wrapper for ClojureScript
 - **re-frame**: State management framework
-- **shadow-cljs**: Build tool and development environment
-- **Tailwind CSS**: Utility-first CSS framework
+- **Shadow-cljs**: Build tool for ClojureScript
 
-### Infrastructure
-- **Docker**: Containerization for easy deployment
-- **Docker Compose**: Multi-service orchestration
-- **Traefik**: Reverse proxy and load balancer (optional)
-
-## Quick Start
+## Development Setup
 
 ### Prerequisites
-- **Docker & Docker Compose**: For containerized deployment
-- **OR** Java 11+ and Clojure CLI tools for local development
-- **Node.js 16+**: For frontend build tools
+- Java 11 or higher
+- Node.js 16 or higher
+- Clojure CLI tools
 
-### Option 1: Docker Deployment (Recommended)
+### Installation
 
-1. **Clone and configure**:
+1. **Clone and setup the project:**
    ```bash
-   git clone <your-repo>
    cd physiotherapy-scheduler
    ```
 
-2. **Start with Docker Compose**:
+2. **Install Node.js dependencies:**
    ```bash
-   docker-compose up -d
-   ```
-
-3. **Access the application**:
-   - Main app: http://localhost:3000
-   - Traefik dashboard: http://localhost:8080 (if enabled)
-
-### Option 2: Local Development
-
-1. **Install dependencies**:
-   ```bash
-   # Backend dependencies
-   clojure -P
-
-   # Frontend dependencies  
    npm install
    ```
 
-2. **Start the database**:
+3. **Install Clojure dependencies:**
    ```bash
-   # Database will be created automatically on first run
+   clj -A:dev -M -e "(println \"Dependencies downloaded\")"
    ```
-
-3. **Start frontend development**:
-   ```bash
-   npm run dev
-   # Or: npx shadow-cljs watch app
-   ```
-
-4. **Start backend server**:
-   ```bash
-   clojure -M:dev
-   # Then in REPL: (user/start)
-   ```
-
-5. **Access the application**:
-   - Frontend dev server: http://localhost:8080
-   - Backend API: http://localhost:3000
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DATABASE_URL` | `jdbc:sqlite:data/scheduler.db` | Database connection string |
-| `HTTP_PORT` | `3000` | HTTP server port |
-| `LOG_LEVEL` | `info` | Logging level (trace, debug, info, warn, error) |
-
-### Database Configuration
-
-The application uses SQLite by default, but can be configured for other databases:
-
-```bash
-# PostgreSQL example
-DATABASE_URL="jdbc:postgresql://localhost:5432/scheduler?user=admin&password=secret"
-
-# MySQL example  
-DATABASE_URL="jdbc:mysql://localhost:3306/scheduler?user=admin&password=secret"
-```
-
-## API Documentation
-
-### Public Endpoints
-
-#### Get Available Slots
-```http
-GET /api/slots/available?start-date=2024-12-01T00:00:00Z&end-date=2024-12-31T23:59:59Z
-```
-
-Response:
-```json
-{
-  "slots": [
-    {
-      "id": 1,
-      "start_time": "2024-12-15T10:00:00Z",
-      "duration_minutes": 60,
-      "status": "available"
-    }
-  ]
-}
-```
-
-#### Book Appointment
-```http
-POST /api/slots/:id/book
-Content-Type: application/json
-
-{
-  "client_name": "John Doe", 
-  "client_email": "john@example.com"
-}
-```
-
-### Admin Endpoints
-
-#### Create Slot
-```http
-POST /api/slots
-Content-Type: application/json
-
-{
-  "start_time": "2024-12-15T10:00:00Z",
-  "duration": 60
-}
-```
-
-#### Get All Slots
-```http
-GET /api/admin/slots
-```
-
-## Deployment
-
-### Docker Production Deployment
-
-1. **Build production image**:
-   ```bash
-   docker build -t physiotherapy-scheduler:latest .
-   ```
-
-2. **Run with production settings**:
-   ```bash
-   docker run -d \
-     --name scheduler \
-     -p 3000:3000 \
-     -v scheduler_data:/app/data \
-     -v scheduler_logs:/app/logs \
-     -e LOG_LEVEL=warn \
-     physiotherapy-scheduler:latest
-   ```
-
-### AWS ECS Deployment
-
-1. **Push image to ECR**:
-   ```bash
-   aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <account>.dkr.ecr.us-east-1.amazonaws.com
-   docker tag physiotherapy-scheduler:latest <account>.dkr.ecr.us-east-1.amazonaws.com/physiotherapy-scheduler:latest
-   docker push <account>.dkr.ecr.us-east-1.amazonaws.com/physiotherapy-scheduler:latest
-   ```
-
-2. **Create ECS task definition** (see `aws/` directory for examples)
-
-3. **Deploy to ECS cluster**
-
-### Traditional Server Deployment
-
-1. **Build uberjar**:
-   ```bash
-   clojure -T:build uber
-   ```
-
-2. **Deploy JAR**:
-   ```bash
-   java -jar target/physiotherapy-scheduler.jar
-   ```
-
-## Development
-
-### Project Structure
-```
-physiotherapy-scheduler/
-├── src/
-│   ├── app/
-│   │   ├── core.clj              # Main application entry
-│   │   ├── db/
-│   │   │   └── core.clj          # Database layer
-│   │   ├── api/
-│   │   │   └── slots.clj         # API endpoints
-│   │   └── frontend/
-│   │       └── core.cljs         # ClojureScript frontend
-├── resources/
-│   ├── migrations/
-│   │   └── 001-initial-schema.sql # Database migrations
-│   └── public/
-│       └── index.html            # HTML template
-├── dev/
-│   └── user.clj                  # Development utilities
-├── deps.edn                      # Clojure dependencies
-├── shadow-cljs.edn              # Frontend build config
-├── Dockerfile                   # Container definition
-└── docker-compose.yml          # Multi-service setup
-```
 
 ### Development Workflow
 
-1. **Start REPL**: `clojure -M:dev`
-2. **Start frontend**: `npm run dev`
-3. **Make changes**: Edit `.clj` or `.cljs` files
-4. **Test changes**: Refresh browser or evaluate in REPL
-5. **Run tests**: `clojure -M:test`
+#### Backend Development
 
-### Adding Features
+1. **Start a Clojure REPL:**
+   ```bash
+   clj -A:dev
+   ```
 
-#### New API Endpoint
-1. Add route to `app.api.slots`
-2. Implement handler function
-3. Add corresponding frontend HTTP call
-4. Update re-frame events and subscriptions
+2. **In the REPL, start the server:**
+   ```clojure
+   (start)
+   ```
 
-#### Database Changes
-1. Create new migration file in `resources/migrations/`
-2. Update database functions in `app.db.core`
-3. Test migration with `(user/migrate!)`
+3. **The server will be available at http://localhost:3000**
 
-## Troubleshooting
+4. **REPL Development Commands:**
+   - `(start)` - Start the server
+   - `(stop)` - Stop the server
+   - `(restart)` - Restart the server with code reload
+   - `(reset-db)` - Reset the database
 
-### Common Issues
+#### Frontend Development
 
-**Database connection errors**:
-- Check `DATABASE_URL` environment variable
-- Ensure SQLite file permissions are correct
-- Verify database directory exists
+1. **Start the ClojureScript compiler in watch mode:**
+   ```bash
+   npm run dev
+   ```
 
-**Frontend not loading**:
-- Check browser console for JavaScript errors
-- Verify ClojureScript compilation: `npm run build`
-- Ensure backend is running on correct port
+2. **Open http://localhost:8080 for the frontend**
 
-**Docker build failures**:
-- Check Docker daemon is running
-- Verify internet connection for dependency downloads
-- Clean Docker cache: `docker system prune`
+3. **The development server will auto-reload on file changes**
 
-### Logs
+### Production Build
 
-- **Application logs**: Check `/app/logs/` in container
-- **Docker logs**: `docker logs physiotherapy-scheduler`
-- **Development logs**: Check REPL output
+1. **Build the frontend:**
+   ```bash
+   npm run build
+   ```
 
-## Security Considerations
+2. **Start the backend server:**
+   ```bash
+   clj -M -m backend.core
+   ```
 
-- **Admin Access**: Currently no authentication - implement auth before production
-- **HTTPS**: Use reverse proxy (Traefik/nginx) with SSL certificates
-- **Database**: Use strong passwords for production databases
-- **Backups**: Regular database backups are included in Docker Compose
+## Configuration
+
+Configuration is managed through `resources/config.edn` using environment-based profiles:
+
+```edn
+{:server {:port #profile {:dev 3000
+                         :prod #env PORT}}
+ :database {:uri #profile {:dev "datomic:local//physiotherapy-dev"
+                          :prod #env DATABASE_URL}}
+ :auth {:secret #profile {:dev "dev-secret-key"
+                         :prod #env AUTH_SECRET}}}
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+
+### Patients (v1)
+- `GET /api/v1/patients` - List all patients
+- `POST /api/v1/patients` - Create new patient
+- `GET /api/v1/patients/:id` - Get patient by ID
+- `PUT /api/v1/patients/:id` - Update patient
+- `DELETE /api/v1/patients/:id` - Delete patient
+
+### Appointments (v1)
+- `GET /api/v1/appointments` - List all appointments
+- `POST /api/v1/appointments` - Create new appointment
+- `GET /api/v1/appointments/:id` - Get appointment by ID
+- `PUT /api/v1/appointments/:id` - Update appointment
+- `DELETE /api/v1/appointments/:id` - Delete appointment
+
+### Time Slots (v1)
+- `GET /api/v1/slots` - List all slots
+- `POST /api/v1/slots` - Create new slot
+- `GET /api/v1/slots/:id` - Get slot by ID
+- `PUT /api/v1/slots/:id` - Update slot
+- `DELETE /api/v1/slots/:id` - Delete slot
+
+## Demo Credentials
+
+For development, use these demo credentials:
+- **Admin**: username: `admin`, password: `admin123`
+- **Therapist**: username: `therapist`, password: `therapist123`
+
+## Project Structure
+
+```
+├── deps.edn                 # Clojure dependencies
+├── shadow-cljs.edn          # ClojureScript build config
+├── package.json             # Node.js dependencies
+├── resources/
+│   └── config.edn          # Configuration
+├── src/
+│   ├── backend/            # Clojure backend code
+│   │   ├── core.clj        # Main server
+│   │   ├── config.clj      # Configuration
+│   │   ├── db/
+│   │   │   └── core.clj    # Database layer
+│   │   ├── api/            # API endpoints
+│   │   └── middleware/     # Middleware
+│   └── frontend/           # ClojureScript frontend code
+│       ├── core.cljs       # Main entry point
+│       ├── db.cljs         # Frontend state schema
+│       ├── events.cljs     # re-frame events
+│       ├── subs.cljs       # re-frame subscriptions
+│       └── views/          # UI components
+├── dev/
+│   └── user.clj            # Development utilities
+└── public/                 # Static assets
+    └── index.html          # HTML template
+```
 
 ## Contributing
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push branch: `git push origin feature/amazing-feature`
-5. Open Pull Request
+1. Follow the existing code style and conventions
+2. Write tests for new features
+3. Use the REPL for interactive development
+4. Ensure proper error handling and validation
 
 ## License
 
-This project is licensed under the MIT License - see LICENSE file for details.
-
-## Support
-
-For issues and questions:
-- Create GitHub issue for bugs/feature requests
-- Check existing documentation and troubleshooting section
-- Review Docker and Clojure community resources
-
----
-
-**Note**: This application is designed for small practices. For large-scale deployments, consider additional security measures, authentication systems, and database optimizations.
+This project is licensed under the MIT License.
