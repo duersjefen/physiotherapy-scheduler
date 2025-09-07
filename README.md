@@ -181,3 +181,20 @@ For development, use these demo credentials:
 ## License
 
 This project is licensed under the MIT License.
+
+## Environment and local development (.env)
+
+This project supports local environment overrides via a `.env` file at the project root. `start-dev.sh` will source `.env` if present and prefer those values over `resources/config.edn` defaults.
+
+Recommended `.env` for development:
+
+```env
+PORT=3000
+FRONTEND_PORT=8080
+DATABASE_FILE=physiotherapy-dev.db
+AUTH_SECRET=dev-secret-key-change-in-production
+```
+
+If an environment variable is not set, `start-dev.sh` falls back to the dev values found in `resources/config.edn` and then to safe defaults (backend: 3000, frontend: 8080).
+
+
