@@ -23,24 +23,33 @@
   (POST "/api/auth/login" request (auth/login request))
   (POST "/api/auth/logout" request (auth/logout request))
   
+  ;; Public appointment request endpoint
+  (POST "/api/v1/appointment-requests" request (appointments/create-appointment-request request))
+  
+  ;; Public massage booking endpoint
+  (POST "/api/v1/massage-bookings" request (appointments/create-massage-booking request))
+  
   ;; V1 API endpoints (protected)
   (GET "/api/v1/patients" request (patients/list-patients request))
   (POST "/api/v1/patients" request (patients/create-patient request))
   (GET "/api/v1/patients/:id" [id :as request] (patients/get-patient id request))
   (PUT "/api/v1/patients/:id" [id :as request] (patients/update-patient id request))
   (DELETE "/api/v1/patients/:id" [id :as request] (patients/delete-patient id request))
+  (GET "/api/v1/patients/recent" request (patients/list-recent-patients request))
   
   (GET "/api/v1/appointments" request (appointments/list-appointments request))
   (POST "/api/v1/appointments" request (appointments/create-appointment request))
   (GET "/api/v1/appointments/:id" [id :as request] (appointments/get-appointment id request))
   (PUT "/api/v1/appointments/:id" [id :as request] (appointments/update-appointment id request))
   (DELETE "/api/v1/appointments/:id" [id :as request] (appointments/delete-appointment id request))
+  (GET "/api/v1/appointments/upcoming" request (appointments/list-upcoming-appointments request))
   
   (GET "/api/v1/slots" request (slots/list-slots request))
   (POST "/api/v1/slots" request (slots/create-slot request))
   (GET "/api/v1/slots/:id" [id :as request] (slots/get-slot id request))
   (PUT "/api/v1/slots/:id" [id :as request] (slots/update-slot id request))
   (DELETE "/api/v1/slots/:id" [id :as request] (slots/delete-slot id request))
+  (GET "/api/v1/slots/available" request (slots/list-available-slots request))
   
   ;; Serve static files
   (route/resources "/")
@@ -61,8 +70,14 @@
   (let [port (config/server-port)]
     (log/info "Starting server on port" port)
     (db/init-db!)
-    (jetty/run-jetty app {:port port :join? false})
-    (while true (Thread/sleep 1000))))
+    (let [server (jetty/run-jetty app {:port port :join? false})]
+      (println "\n🎉 PhysioLife Clinic Server Started!")
+      (println (str "📱 Frontend: http://localhost:8080"))
+      (println (str "🚀 Backend API: http://localhost:" port))
+      (println "🏥 Professional physiotherapy management system ready!")
+      server)))
 
 (defn -main [& args]
-  (start-server))
+  (let [server (start-server)]
+    ;; Keep the main thread alive
+    (.join server)))

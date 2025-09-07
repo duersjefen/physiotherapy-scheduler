@@ -1,7 +1,7 @@
 (ns backend.config)
 
 (defn server-port []
-  (Integer/parseInt (or (System/getenv "PORT") "8085")))
+  (Integer/parseInt (or (System/getenv "PORT") "5000")))
 
 (defn database-file []
   (or (System/getenv "DATABASE_FILE") "physiotherapy-dev.db"))

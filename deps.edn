@@ -10,8 +10,9 @@
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         compojure/compojure {:mvn/version "1.7.0"}
         
-        ;; Database (using SQLite for now, can upgrade to Datomic later)
+        ;; Database - SQLite for simplicity
         org.xerial/sqlite-jdbc {:mvn/version "3.42.0.0"}
+        com.github.seancorfield/next.jdbc {:mvn/version "1.3.894"}
         
         ;; JSON
         cheshire/cheshire {:mvn/version "5.11.0"}
@@ -25,6 +26,9 @@
         ;; Configuration
         aero/aero {:mvn/version "1.1.6"}
         
+        ;; Date/Time
+        tick/tick {:mvn/version "0.6.2"}
+        
         ;; Specs
         org.clojure/spec.alpha {:mvn/version "0.3.218"}}
 
@@ -32,4 +36,13 @@
                  :extra-deps {org.clojure/tools.namespace {:mvn/version "1.4.4"}}}
            
            :test {:extra-paths ["test"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}}}
+                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}
+                               org.clojure/test.check {:mvn/version "1.1.1"}
+                               day8.re-frame/test {:mvn/version "0.1.5"}
+                               cljs-http/cljs-http {:mvn/version "0.1.46"}}}
+                               
+           :test-clj {:main-opts ["-m" "kaocha.runner" "--reporter" "documentation"]}
+           
+           :test-cljs {:extra-paths ["test"]
+                       :extra-deps {thheller/shadow-cljs {:mvn/version "2.28.23"}
+                                    day8.re-frame/test {:mvn/version "0.1.5"}}}}}

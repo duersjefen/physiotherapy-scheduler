@@ -3,7 +3,7 @@
 
 (defn api-request [method uri & [opts]]
   (merge {:method method
-          :uri (str "http://localhost:8085" uri)
+          :uri (str "http://localhost:5000" uri)
           :format (ajax/json-request-format)
           :response-format (ajax/json-response-format {:keywords? true})}
          opts))

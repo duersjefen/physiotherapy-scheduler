@@ -1,0 +1,103 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "shadow-cljs: watch app",
+			"type": "shell",
+			"command": "npx shadow-cljs watch app",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "backend: start",
+			"type": "shell",
+			"command": "clj -A:dev -M -m backend.core",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Start Dev (shadow + backend)",
+			"dependsOn": [
+				"shadow-cljs: watch app",
+				"backend: start"
+			],
+			"dependsOrder": "parallel"
+		},
+		{
+			"label": "dev-frontend",
+			"type": "shell",
+			"command": "npx shadow-cljs watch app",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Frontend",
+			"type": "shell",
+			"command": "npx shadow-cljs watch app",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Backend",
+			"type": "shell",
+			"command": "clojure -M -m backend.core",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Shadow-cljs Server",
+			"type": "shell",
+			"command": "npx shadow-cljs server",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Backend Tests",
+			"type": "shell",
+			"command": "clojure -M:test-clj",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Run Tests Simple",
+			"type": "shell",
+			"command": "clojure -M:test -m clojure.test.runner",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Run Single Test",
+			"type": "shell",
+			"command": "clojure -M:test -m backend.db.core-test",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Frontend Watch",
+			"type": "shell",
+			"command": "npx shadow-cljs watch app",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Start Backend Server",
+			"type": "shell",
+			"command": "clojure -M:backend -m backend.core",
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}

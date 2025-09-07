@@ -2,7 +2,8 @@
   (:require [backend.db.core :as db]
             [cheshire.core :as json]
             [clojure.spec.alpha :as s]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log])
+  (:import [java.util UUID Date]))
 
 ;; Specs
 (s/def ::start-time inst?)
@@ -10,7 +11,8 @@
 (s/def ::available boolean?)
 
 (s/def ::slot-create
-  (s/keys :req-un [::start-time ::end-time]))
+  (s/keys :req-un [::start-time ::end-time]
+          :opt-un [::available]))
 
 (s/def ::slot-update
   (s/keys :opt-un [::start-time ::end-time ::available]))
@@ -28,6 +30,18 @@
        :body {:slots slots}})
     (catch Exception e
       (log/error "Error listing slots:" (.getMessage e))
+      {:status 500
+       :body {:error "Internal server error"}})))
+
+(defn list-available-slots [request]
+  "Get available slots for appointment booking"
+  (try
+    (let [slots (db/list-slots)
+          available-slots (filter #(= (:available %) 1) slots)]
+      {:status 200
+       :body {:slots (take 20 available-slots)}})
+    (catch Exception e
+      (log/error "Error listing available slots:" (.getMessage e))
       {:status 500
        :body {:error "Internal server error"}})))
 
@@ -55,16 +69,12 @@
 
 (defn get-slot [id request]
   (try
-    (let [slot-id (java.util.UUID/fromString id)
-          slot (db/get-slot slot-id)]
+    (let [slot (db/get-slot id)]
       (if slot
         {:status 200
          :body {:slot slot}}
         {:status 404
          :body {:error "Slot not found"}}))
-    (catch IllegalArgumentException e
-      {:status 400
-       :body {:error "Invalid slot ID format"}})
     (catch Exception e
       (log/error "Error getting slot:" (.getMessage e))
       {:status 500
@@ -72,16 +82,12 @@
 
 (defn update-slot [id request]
   (try
-    (let [slot-id (java.util.UUID/fromString id)
-          updates (:body request)]
+    (let [updates (:body request)]
       (validate-request ::slot-update updates)
-      (when (db/get-slot slot-id)
-        (db/update-slot! slot-id updates)
+      (when (db/get-slot id)
+        (db/update-slot! id updates)
         {:status 200
          :body {:message "Slot updated successfully"}}))
-    (catch IllegalArgumentException e
-      {:status 400
-       :body {:error "Invalid slot ID format"}})
     (catch clojure.lang.ExceptionInfo e
       (if (= (:type (ex-data e)) :validation-error)
         {:status 400
@@ -98,14 +104,10 @@
 
 (defn delete-slot [id request]
   (try
-    (let [slot-id (java.util.UUID/fromString id)]
-      (when (db/get-slot slot-id)
-        (db/delete-slot! slot-id)
-        {:status 200
-         :body {:message "Slot deleted successfully"}}))
-    (catch IllegalArgumentException e
-      {:status 400
-       :body {:error "Invalid slot ID format"}})
+    (when (db/get-slot id)
+      (db/delete-slot! id)
+      {:status 200
+       :body {:message "Slot deleted successfully"}})
     (catch Exception e
       (log/error "Error deleting slot:" (.getMessage e))
       {:status 500

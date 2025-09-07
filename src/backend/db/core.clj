@@ -1,6 +1,7 @@
 (ns backend.db.core
   (:require [backend.config :as config]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [clojure.string :as str])
   (:import [java.sql DriverManager Connection PreparedStatement ResultSet]
            [java.util Date UUID]))
 
@@ -68,6 +69,18 @@
      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
      FOREIGN KEY (patient_id) REFERENCES patients(id),
      FOREIGN KEY (slot_id) REFERENCES slots(id)
+   );"
+   
+   "CREATE TABLE IF NOT EXISTS massage_bookings (
+     id TEXT PRIMARY KEY,
+     name TEXT NOT NULL,
+     email TEXT NOT NULL,
+     phone TEXT NOT NULL,
+     service_type TEXT NOT NULL,
+     booking_type TEXT NOT NULL,
+     notes TEXT,
+     status TEXT DEFAULT 'pending',
+     created_at TEXT DEFAULT CURRENT_TIMESTAMP
    );"])
 
 (defn init-db! []
@@ -161,6 +174,26 @@
     JOIN patients p ON a.patient_id = p.id 
     JOIN slots s ON a.slot_id = s.id 
     ORDER BY s.start_time"))
+
+;; Massage booking operations
+(defn create-massage-booking! [booking-data]
+  (execute-query! 
+   "INSERT INTO massage_bookings (id, name, email, phone, service_type, booking_type, notes, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+   (:id booking-data)
+   (:name booking-data)
+   (:email booking-data)
+   (:phone booking-data)
+   (name (:service-type booking-data))
+   (name (:booking-type booking-data))
+   (:notes booking-data)
+   (name (:status booking-data))
+   (str (:created-at booking-data))))
+
+(defn list-massage-bookings []
+  (query "SELECT * FROM massage_bookings ORDER BY created_at DESC"))
+
+(defn get-massage-booking [booking-id]
+  (query-one "SELECT * FROM massage_bookings WHERE id = ?" booking-id))
 
 (defn update-appointment! [appointment-id updates]
   (let [set-clauses (map #(str (name %) " = ?") (keys updates))

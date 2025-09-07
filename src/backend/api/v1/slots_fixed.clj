@@ -1,0 +1,1 @@
+(ns backend.api.v1.slots-fixed)

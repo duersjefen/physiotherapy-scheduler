@@ -1,49 +1,130 @@
 (ns frontend.views.dashboard
   (:require [re-frame.core :as rf]))
 
-(defn stats-card [title value]
-  [:div.stats-card
-   [:h3 title]
-   [:p.stats-value value]])
-
-(defn dashboard []
+(defn dashboard-stats []
   (let [patients @(rf/subscribe [:patients])
         appointments @(rf/subscribe [:appointments])
-        slots @(rf/subscribe [:slots])
-        available-slots @(rf/subscribe [:available-slots])]
-    
-    ;; Load data on component mount
-    (rf/dispatch [:load-patients])
-    (rf/dispatch [:load-appointments])
-    (rf/dispatch [:load-slots])
-    
-    [:div.dashboard
-     [:h1 "Dashboard"]
-     [:div.stats-grid
-      [stats-card "Total Patients" (count patients)]
-      [stats-card "Total Appointments" (count appointments)]
-      [stats-card "Available Slots" (count available-slots)]
-      [stats-card "Total Slots" (count slots)]]
+        todays-appointments @(rf/subscribe [:todays-appointments])
+        this-week-sessions @(rf/subscribe [:this-week-sessions])]
+    [:div.dashboard-stats
+     [:div.stat-card
+      [:div.stat-icon "📅"]
+      [:div.stat-content
+       [:h3 (str (count todays-appointments))]
+       [:p "Today's Appointments"]]]
      
-     [:div.dashboard-content
-      [:div.recent-appointments
-       [:h2 "Recent Appointments"]
-       (if (empty? appointments)
-         [:p "No appointments found"]
-         [:div.appointments-list
-          (for [appointment (take 5 appointments)]
-            ^{:key (:appointment/id appointment)}
-            [:div.appointment-card
-             [:p "Patient: " (get-in appointment [:appointment/patient :patient/name])]
-             [:p "Time: " (str (get-in appointment [:appointment/slot :slot/start-time]))]
-             [:p "Status: " (name (:appointment/status appointment))]])])]
+     [:div.stat-card
+      [:div.stat-icon "👥"]
+      [:div.stat-content
+       [:h3 (str (count patients))]
+       [:p "Total Patients"]]]
+     
+     [:div.stat-card
+      [:div.stat-icon "📊"]
+      [:div.stat-content
+       [:h3 (str (count this-week-sessions))]
+       [:p "This Week's Sessions"]]]
+     
+     [:div.stat-card
+      [:div.stat-icon "⭐"]
+      [:div.stat-content
+       [:h3 "96%"]
+       [:p "Patient Satisfaction"]]]]))
+
+(defn upcoming-appointments []
+  (let [appointments @(rf/subscribe [:upcoming-appointments])]
+    [:div.upcoming-appointments
+     [:h3 "Upcoming Appointments"]
+     (if (empty? appointments)
+       [:p.no-data "No upcoming appointments today"]
+       [:div.appointments-list
+        (for [appointment (take 5 appointments)]
+          [:div.appointment-card {:key (:id appointment)}
+           [:div.appointment-time
+            [:span.time (or (:start-time appointment) "TBD")]
+            [:span.date (or (:date appointment) "Today")]]
+           [:div.appointment-details
+            [:h4 (or (:patient-name appointment) "Unknown Patient")]
+            [:p (or (:treatment-type appointment) "General Physiotherapy")]
+            (when (:notes appointment)
+              [:p.notes (:notes appointment)])]
+           [:div.appointment-actions
+            [:button.btn-small.btn-secondary 
+             {:on-click #(rf/dispatch [:view-patient (:patient-id appointment)])}
+             "View Patient"]
+            [:button.btn-small.btn-primary
+             {:on-click #(rf/dispatch [:start-session (:id appointment)])}
+             "Start Session"]]])])]))
+
+(defn recent-patients []
+  (let [patients @(rf/subscribe [:recent-patients])]
+    [:div.recent-patients
+     [:h3 "Recent Patients"]
+     (if (empty? patients)
+       [:p.no-data "No recent patient activity"]
+       [:div.patients-list
+        (for [patient (take 5 patients)]
+          [:div.patient-card {:key (:id patient)}
+           [:div.patient-info
+            [:h4 (:name patient)]
+            [:p (:email patient)]
+            [:p.last-visit "Last visit: " (or (:last-visit patient) "N/A")]]
+           [:div.patient-actions
+            [:button.btn-small.btn-secondary
+             {:on-click #(rf/dispatch [:view-patient-history (:id patient)])}
+             "View History"]
+            [:button.btn-small.btn-primary
+             {:on-click #(rf/dispatch [:schedule-appointment (:id patient)])}
+             "Schedule"]]])])]))
+
+(defn quick-actions []
+  [:div.quick-actions
+   [:h3 "Quick Actions"]
+   [:div.actions-grid
+    [:button.action-card
+     {:on-click #(rf/dispatch [:set-current-page :appointments])}
+     [:div.action-icon "📅"]
+     [:span "Manage Appointments"]]
+    
+    [:button.action-card
+     {:on-click #(rf/dispatch [:set-current-page :patients])}
+     [:div.action-icon "👥"]
+     [:span "Patient Records"]]
+    
+    [:button.action-card
+     {:on-click #(rf/dispatch [:show-new-patient-modal])}
+     [:div.action-icon "➕"]
+     [:span "New Patient"]]
+    
+    [:button.action-card
+     {:on-click #(rf/dispatch [:set-current-page :slots])}
+     [:div.action-icon "🕒"]
+     [:span "Available Slots"]]]])
+
+(defn dashboard-header []
+  (let [user @(rf/subscribe [:user])]
+    [:div.dashboard-header
+     [:h1 "Welcome back, " (or (:name user) "Doctor")]
+     [:p.dashboard-subtitle "Here's what's happening in your practice today"]]))
+
+(defn dashboard-page []
+  (let [loading? @(rf/subscribe [:loading])]
+    ;; Load data when component mounts
+    (rf/dispatch [:load-dashboard-data])
+    
+    [:div.dashboard-page
+     [:div.container
+      [dashboard-header]
+      [dashboard-stats]
       
-      [:div.quick-actions
-       [:h2 "Quick Actions"]
-       [:div.action-buttons
-        [:button {:on-click #(rf/dispatch [:set-current-page :patients])}
-         "Manage Patients"]
-        [:button {:on-click #(rf/dispatch [:set-current-page :appointments])}
-         "Schedule Appointment"]
-        [:button {:on-click #(rf/dispatch [:set-current-page :slots])}
-         "Manage Slots"]]]]]))
+      [:div.dashboard-content
+       [:div.dashboard-main
+        [upcoming-appointments]]
+       
+       [:div.dashboard-sidebar
+        [recent-patients]
+        [quick-actions]]]]]))
+
+;; Legacy dashboard function for backward compatibility
+(defn dashboard []
+  [dashboard-page])

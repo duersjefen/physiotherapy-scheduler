@@ -1,0 +1,15 @@
+#kaocha/v1
+{:tests [{:id :unit
+          :test-paths ["test/backend" "test/frontend"]
+          :skip-meta [:integration]
+          :reporter [kaocha.report/dots]}
+         
+         {:id :integration  
+          :test-paths ["test/integration"]
+          :reporter [kaocha.report/documentation]}]
+          
+ :reporter [kaocha.report/documentation]
+ :color? true
+ :fail-fast? false
+ :randomize? false
+ :watch? false}

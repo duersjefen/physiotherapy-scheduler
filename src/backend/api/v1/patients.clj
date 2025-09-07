@@ -2,7 +2,8 @@
   (:require [backend.db.core :as db]
             [cheshire.core :as json]
             [clojure.spec.alpha :as s]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log])
+  (:import [java.util UUID]))
 
 ;; Specs
 (s/def ::name string?)
@@ -18,7 +19,7 @@
 
 (defn- validate-request [spec data]
   (when-not (s/valid? spec data)
-    (throw (ex-info "Invalid request data" 
+    (throw (ex-info "Invalid request data"
                     {:type :validation-error
                      :errors (s/explain-data spec data)}))))
 
@@ -56,7 +57,7 @@
 
 (defn get-patient [id request]
   (try
-    (let [patient-id (java.util.UUID/fromString id)
+    (let [patient-id (UUID/fromString id)
           patient (db/get-patient patient-id)]
       (if patient
         {:status 200
@@ -73,7 +74,7 @@
 
 (defn update-patient [id request]
   (try
-    (let [patient-id (java.util.UUID/fromString id)
+    (let [patient-id (UUID/fromString id)
           updates (:body request)]
       (validate-request ::patient-update updates)
       (when (db/get-patient patient-id)
@@ -99,7 +100,7 @@
 
 (defn delete-patient [id request]
   (try
-    (let [patient-id (java.util.UUID/fromString id)]
+    (let [patient-id (UUID/fromString id)]
       (when (db/get-patient patient-id)
         (db/delete-patient! patient-id)
         {:status 200
@@ -109,5 +110,17 @@
        :body {:error "Invalid patient ID format"}})
     (catch Exception e
       (log/error "Error deleting patient:" (.getMessage e))
+      {:status 500
+       :body {:error "Internal server error"}})))
+
+(defn list-recent-patients [request]
+  "Get recently added or updated patients for dashboard"
+  (try
+    (let [patients (db/list-patients)
+          recent (take 5 patients)]
+      {:status 200
+       :body {:patients recent}})
+    (catch Exception e
+      (log/error "Error listing recent patients:" (.getMessage e))
       {:status 500
        :body {:error "Internal server error"}})))
