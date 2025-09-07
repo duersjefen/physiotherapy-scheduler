@@ -1,6 +1,9 @@
 # Clojure
 .cpcache/
 .nrepl-port
+/.clj-kondo
+/.lsp
+/.calva
 .rebel_readline_history
 target/
 .lein-*
