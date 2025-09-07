@@ -99,9 +99,14 @@ A comprehensive physiotherapy appointment scheduling system built with Clojure/C
 
 ## Configuration
 
-Configuration is managed through `resources/config.edn` using environment-based profiles:
+Configuration is managed through environment variables with defaults:
 
-```edn
+- PORT: Server port (default 8085)
+- DATABASE_FILE: SQLite database file (default physiotherapy-dev.db)
+- AUTH_SECRET: Authentication secret (default dev-secret-key-change-in-production)
+- SESSION_TIMEOUT: Session timeout in minutes (default 60)
+
+Set these in `.env` for local development.
 {:server {:port #profile {:dev 3000
                          :prod #env PORT}}
  :database {:uri #profile {:dev "datomic:local//physiotherapy-dev"
@@ -189,7 +194,7 @@ This project supports local environment overrides via a `.env` file at the proje
 Recommended `.env` for development:
 
 ```env
-PORT=3000
+PORT=8085
 FRONTEND_PORT=8080
 DATABASE_FILE=physiotherapy-dev.db
 AUTH_SECRET=dev-secret-key-change-in-production

@@ -58,10 +58,11 @@
       (wrap-defaults (assoc-in site-defaults [:security :anti-forgery] false))))
 
 (defn start-server []
-  (let [port (get-in (config/load-config) [:server :port])]
+  (let [port (config/server-port)]
     (log/info "Starting server on port" port)
     (db/init-db!)
-    (jetty/run-jetty app {:port port :join? false})))
+    (jetty/run-jetty app {:port port :join? false})
+    (while true (Thread/sleep 1000))))
 
 (defn -main [& args]
   (start-server))

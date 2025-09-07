@@ -16,7 +16,6 @@ physiotherapy-scheduler/
 ├── package.json               # Node.js dependencies
 ├── start-dev.sh              # Development startup script
 ├── README.md                 # Full documentation
-├── resources/config.edn      # Configuration
 ├── src/
 │   ├── backend/              # Clojure backend
 │   │   ├── core.clj         # Main server & routes
@@ -150,7 +149,7 @@ npm run build  # Build optimized ClojureScript
 
 ## 🆘 Troubleshooting
 
-**Port conflicts?** Change ports in `resources/config.edn` and `shadow-cljs.edn`
+**Port conflicts?** Change ports in `.env` and `shadow-cljs.edn`
 **Database issues?** Delete `physiotherapy-dev.db` to reset  
 **Dependencies?** Run `clj -A:dev -M -e "(println \"deps ok\")"` to check Clojure deps
 **REPL not connecting?** Ensure you're in the project directory

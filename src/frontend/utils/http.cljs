@@ -1,4 +1,4 @@
-(ns physiotherapy-scheduler.frontend.utils.http
+(ns frontend.utils.http
   (:require [ajax.core :as ajax]))
 
 (defn api-request [method uri & [opts]]

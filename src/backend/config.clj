@@ -1,30 +1,16 @@
-(ns backend.config
-  (:require [aero.core :as aero]
-            [clojure.java.io :as io]))
-
-(def ^:private config-cache (atom nil))
-
-(defn load-config
-  ([]
-   (load-config :dev))
-  ([profile]
-   (if-let [cached @config-cache]
-     cached
-     (let [config (aero/read-config (io/resource "config.edn") {:profile profile})]
-       (reset! config-cache config)
-       config))))
-
-(defn get-config [& keys]
-  (get-in (load-config) keys))
+(ns backend.config)
 
 (defn server-port []
-  (get-config :server :port))
+  (Integer/parseInt (or (System/getenv "PORT") "8085")))
+
+(defn database-file []
+  (or (System/getenv "DATABASE_FILE") "physiotherapy-dev.db"))
 
 (defn database-uri []
-  (get-config :database :uri))
+  (str "jdbc:sqlite:" (database-file)))
 
 (defn auth-secret []
-  (get-config :auth :secret))
+  (or (System/getenv "AUTH_SECRET") "dev-secret-key-change-in-production"))
 
 (defn session-timeout []
-  (get-config :auth :session-timeout-minutes))
+  (Integer/parseInt (or (System/getenv "SESSION_TIMEOUT") "60")))

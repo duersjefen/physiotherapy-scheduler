@@ -9,8 +9,8 @@
 (defn get-connection []
   (if-let [conn @connection]
     conn
-    (let [db-file (config/get-config :database :db-file)
-          conn (DriverManager/getConnection (str "jdbc:sqlite:" db-file))]
+        (let [db-uri (config/database-uri)
+          conn (DriverManager/getConnection db-uri)]
       (reset! connection conn)
       conn)))
 
